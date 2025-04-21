@@ -8,6 +8,7 @@ import {
 } from './gallery.js';
 import { renderBidHistory } from './bidHistory.js';
 import { auction } from './constants.js';
+import { sendMail } from './email.js';
 
 export function renderItem(container, item, currentUser) {
     const card = document.createElement("div");
@@ -86,7 +87,7 @@ export function renderItem(container, item, currentUser) {
         bnButton.id = `bnbtn-${item.id}`;
         bnButton.className = "bn-btn";
         bnButton.textContent = "Request Now";
-        bnButton.onclick = () => placeBuyNow(item.id, card, item.buy_now, item.seller_name);
+        bnButton.onclick = () => placeBuyNow(item.id, card, item.buy_now, item.seller_name, item.title, item.seller_email);
         bidSection.appendChild(bnButton);
     }
 
@@ -140,7 +141,7 @@ export function renderItem(container, item, currentUser) {
     return card;
 }
 
-window.placeBuyNow = async function(id, card, price, seller_name) {
+window.placeBuyNow = async function(id, card, price, seller_name, title, seller_email) {
     const user = await authUser();
 
     if (!user) {
@@ -168,6 +169,10 @@ window.placeBuyNow = async function(id, card, price, seller_name) {
     renderBidHistory(id, card, user);
     const buynowbtn = document.getElementById(`bnbtn-${id}`);
     buynowbtn.remove();
+
+    // Send mail
+    sendMail(user.email, seller_name, title, price, [seller_email])
+
     alert("✅ Congrats on your purchase! Please contact seller: " + seller_name);
 };
 
